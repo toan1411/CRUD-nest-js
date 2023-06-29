@@ -12,7 +12,7 @@ import { Event } from './event.entity';
   ],
 
   controllers: [EventsController],
-  providers: [EventService,],
+  providers: [EventService],
   exports: [EventService]
 })
 export class EventModule { }

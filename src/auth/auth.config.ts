@@ -5,7 +5,7 @@ export const jwtConfig : JwtModuleAsyncOptions = {
         return {
             secret: process.env.AUTH_SECRET,
             signOptions: {
-                expiresIn: '60m'
+                expiresIn: process.env.EXPIRES_IN
             }
         }
     }

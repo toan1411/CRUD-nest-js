@@ -1,7 +1,7 @@
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from "@nestjs/typeorm"
 import { Event } from './event/event.entity';
-import { User } from './auth/user.entity';
+import { User } from './user/user.entity';
 
 class TypeOrmConfig {
     static getOrmConfig(configService: ConfigService): TypeOrmModuleOptions {

@@ -1,8 +1,10 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateEventDTO } from './create-event.dto';
 import { EventService } from './event.service';
 import { ApiCreatedResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { User } from 'src/user/user.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('/event')
 export class EventsController {
@@ -41,31 +43,35 @@ export class EventsController {
 
 
   @ApiCreatedResponse()
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(@Body(new ValidationPipe({ groups: ["create"] })) input: CreateEventDTO) {
+  async create(@Body() input: CreateEventDTO, @CurrentUser() user: User) {
     if (!input) {
       throw new BadRequestException("Input is empty")
     }
-    return this.eventService.createEvent(input);
+    return this.eventService.createEvent(input, user);
 
   }
 
   @Patch(':id')
   @ApiParam({ name: "id" })
   @ApiCreatedResponse()
-  async update(@Param('id') id, @Body(new ValidationPipe({ groups: ["update"] })) input) {
+  @UseGuards(AuthGuard('jwt'))
+  async update(@Param('id') id, @Body(new ValidationPipe({ groups: ["update"] })) input, @CurrentUser() user: User) {
     if (Object.keys(input).length === 0) {
       throw new BadRequestException("Input is empty")
     }
-    return this.eventService.updateEvent(id, input);
+
+    return this.eventService.updateEvent(id, input, user);
   }
 
 
   @Delete(':id')
   @HttpCode(204)
   @ApiParam({ name: "id" })
-  async remove(@Param('id') id) {
-    return this.eventService.removeEvent(id);
+  @UseGuards(AuthGuard('jwt'))
+  async remove(@Param('id') id, @CurrentUser() user: User) {
+    return this.eventService.removeEvent(id, user);
 
   }
 }

@@ -4,6 +4,7 @@ import { AuthModule } from "./auth/auth.module";
 import { typeOrmConfigAsync } from "./typeOrmConfig";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
+
 @Module({
     imports:[
         TypeOrmModule.forRootAsync(typeOrmConfigAsync),

@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Event } from './event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateEventDTO } from './create-event.dto';
+import { User } from 'src/user/user.entity';
 
 
 
@@ -26,24 +28,34 @@ export class EventService {
 
   async getEvent(id) {
     const event = await this.repository.findOne({ where: { id: id } })
-    if(!event){
+    if (!event) {
       throw new NotFoundException();
     }
     return event;
 
   }
 
-  async createEvent(input: any) {
-    return await this.repository.save({
+  async createEvent(input: CreateEventDTO, user: User) {
+    const savedEvent = await this.repository.save({
       ...input,
+      organizer: user,
       when: new Date(input.when),
     })
+
+    if (!savedEvent) {
+      throw new BadRequestException("Saving faild")
+    }
+    return savedEvent;
   }
 
-  async updateEvent(id, input) {
+  async updateEvent(id, input, user) {
     const event = await this.repository.findOne({ where: { id: id } });
-    if(!event){
+    if (!event) {
       throw new NotFoundException();
+    }
+
+    if (event.organizerId !== user.id) {
+      throw new ForbiddenException("You are not authorized to change this event")
     }
 
     return await this.repository.save({
@@ -53,10 +65,14 @@ export class EventService {
     })
   }
 
-  async removeEvent(id) {
+  async removeEvent(id, user) {
     const event = await this.repository.findOne({ where: { id: id } });
-    if(!event){
+    if (!event) {
       throw new NotFoundException();
+    }
+
+    if (user.id !== event.organizerId) {
+      throw new ForbiddenException("You are not authorized to remove this event")
     }
     await this.repository.remove(event)
   }
