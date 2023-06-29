@@ -17,12 +17,13 @@ export class LocalStrategy extends PassportStrategy(Strategy){
     }
 
     public async validate(username: string, password: string): Promise<any>{
-        const user = await this.userRepository.findOne({where: {username}});
+        const user = await this.userRepository.findOne({where: {username: username}});
         if(!user){
             throw new UnauthorizedException();
         }
 
-        if(!(await bcript.compare(password,user.password))){
+        const isEqual = await bcript.compare(password,user.password)
+        if(! isEqual){
             this.logger.debug(`Invalid credentials for user ${username}`);
             throw new UnauthorizedException();
         }

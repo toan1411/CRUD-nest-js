@@ -3,7 +3,7 @@ import { AuthService } from "../auth.service";
 import { User } from "../user.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BadRequestException, Body, Controller, Post} from "@nestjs/common";
-import { CreateUserDTO } from "./create.user.dto";
+import { CreateUserDTO } from "./create-user.dto";
 
 @Controller('/user')
 export class ControllerUser {
