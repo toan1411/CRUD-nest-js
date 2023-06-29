@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateEventDTO } from './create-event.dto';
 import { EventService } from './event.service';
-import { ApiCreatedResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/user.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -44,6 +44,7 @@ export class EventsController {
 
   @ApiCreatedResponse()
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @Post()
   async create(@Body() input: CreateEventDTO, @CurrentUser() user: User) {
     if (!input) {

@@ -2,7 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { AuthService } from "../auth/auth.service";
 import { User } from "./user.entity";
 import { Repository } from "typeorm";
-import { BadRequestException, Body, Injectable, Post } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateUserDTO } from "./create-user.dto";
 
 
@@ -14,8 +14,7 @@ export class UserService {
     ) { }
 
 
-    @Post()
-    async CreateUser(@Body() createUserDTO: CreateUserDTO) {
+    async CreateUser(createUserDTO: CreateUserDTO) {
         const user = new User();
 
         if (createUserDTO.password !== createUserDTO.retypePassword) {

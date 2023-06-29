@@ -14,6 +14,7 @@ async function bootstrap() {
     .setTitle('Events')
     .setDescription('The event API description')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -21,3 +22,5 @@ async function bootstrap() {
   await app.listen(3000);
 }
 bootstrap();
+
+
