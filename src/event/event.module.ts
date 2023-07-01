@@ -13,6 +13,6 @@ import { Event } from './event.entity';
 
   controllers: [EventsController],
   providers: [EventService],
-  exports: [EventService]
+  exports: [EventService, TypeOrmModule.forFeature([Event]),]
 })
 export class EventModule { }

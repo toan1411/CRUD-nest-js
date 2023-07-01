@@ -4,14 +4,28 @@ import { User } from "./user.entity";
 import { Repository } from "typeorm";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateUserDTO } from "./create-user.dto";
+import { Event } from "src/event/event.entity";
 
 
 @Injectable()
 export class UserService {
     constructor(private readonly authService: AuthService,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>
+        private readonly userRepository: Repository<User>, 
+        @InjectRepository(Event)
+        private readonly eventRepository: Repository<Event>
     ) { }
+    
+    
+    async getUserById(id){
+        const user = await this.userRepository.createQueryBuilder('user')
+        .leftJoinAndSelect('user.organized', 'event').where({id:id}).getMany();
+
+        if(user.length === 0){
+            throw new BadRequestException('User not found')
+        }
+        return user;
+    }
 
 
     async CreateUser(createUserDTO: CreateUserDTO) {

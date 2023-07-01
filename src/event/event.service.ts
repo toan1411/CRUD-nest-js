@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { Event } from './event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateEventDTO } from './create-event.dto';
+import { EventDTO } from './event.dto';
 import { User } from 'src/user/user.entity';
 
 
@@ -35,7 +35,7 @@ export class EventService {
 
   }
 
-  async createEvent(input: CreateEventDTO, user: User) {
+  async createEvent(input: EventDTO, user: User) {
     const savedEvent = await this.repository.save({
       ...input,
       organizer: user,
@@ -51,7 +51,7 @@ export class EventService {
   async updateEvent(id, input, user) {
     const event = await this.repository.findOne({ where: { id: id } });
     if (!event) {
-      throw new NotFoundException();
+      throw new NotFoundException("Not Found Event");
     }
 
     if (event.organizerId !== user.id) {
