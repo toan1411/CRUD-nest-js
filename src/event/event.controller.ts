@@ -1,5 +1,5 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, Query, UseGuards, ValidationPipe } from '@nestjs/common';
-import {  EventDTO } from './event.dto';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { EventDTO } from './event.dto';
 import { EventService } from './event.service';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/current-user.decorator';
@@ -60,13 +60,9 @@ export class EventsController {
   @ApiParam({ name: "id" })
   @ApiBearerAuth()
   @ApiCreatedResponse()
-  //@UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'update event' })
-  async update(@Param('id') id, /*@Body(new ValidationPipe({ groups: ["update"] })) input*/ @Body() input:EventDTO, @CurrentUser() user: User) {
-    // if (Object.keys(input).length === 0) {
-    //   throw new BadRequestException("Input is empty")
-    // }
-
+  async update(@Param('id') id, @Body() input: EventDTO, @CurrentUser() user: User) {
     return this.eventService.updateEvent(id, input, user);
   }
 

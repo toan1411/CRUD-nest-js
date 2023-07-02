@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import {  Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
-import { ApiBearerAuth, ApiCreatedResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { LoginDto } from "./login.dto";
+
+
 
 
 @Controller('auth')
@@ -14,10 +16,12 @@ export class AuthController {
     @Post('login')
     @UseGuards(AuthGuard('local'))
     @ApiOperation({ summary: 'user login here' })
+    @ApiUnauthorizedResponse()
+    @ApiBody({type : LoginDto })
     @ApiCreatedResponse()
     async login(@CurrentUser() user) {
         return {
-            userID: user.id,
+            userID: user?.id,
             token: this.authService.getTokenForUser(user)
         }
     }

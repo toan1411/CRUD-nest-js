@@ -10,22 +10,24 @@ import * as bcript from "bcrypt"
 export class LocalStrategy extends PassportStrategy(Strategy) {
     private readonly logger = new Logger(LocalStrategy.name);
 
+
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>) {
         super();
     }
 
-    public async validate(username: string, password: string): Promise<any> {
+    public async validate(username: string, password: string): Promise<User> {
+
         const user = await this.userRepository.findOne({ where: { username: username } });
         if (!user) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Username or password not correctly");
         }
 
         const isEqual = await bcript.compare(password, user.password)
         if (!isEqual) {
             this.logger.debug(`Invalid credentials for user ${username}`);
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("Password not correctly");
         }
         return user
     }
