@@ -4,6 +4,7 @@ import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import { LoginDto } from "./login.dto";
+import { User } from "src/user/user.entity";
 
 
 
@@ -19,9 +20,9 @@ export class AuthController {
     @ApiUnauthorizedResponse()
     @ApiBody({type : LoginDto })
     @ApiCreatedResponse()
-    async login(@CurrentUser() user) {
+    async login(@CurrentUser() user : User) {
         return {
-            userID: user?.id,
+            userID: user.id,
             token: this.authService.getTokenForUser(user)
         }
     }
@@ -30,7 +31,7 @@ export class AuthController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'show profile of user' })
     @UseGuards(AuthGuard('jwt'))
-    async getProfile(@CurrentUser() user) {
+    async getProfile(@CurrentUser() user : User) {
         return user;
     }
 }

@@ -2,33 +2,38 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { AuthService } from "../auth/auth.service";
 import { User } from "./user.entity";
 import { Repository } from "typeorm";
-import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateUserDTO } from "./create-user.dto";
-import { Event } from "src/event/event.entity";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { UserDTO } from "./dto/user.dto";
+interface IOptions {
+    page: number,
+    limit: number,
+    jobTitble: string,
+}
 
 
 @Injectable()
 export class UserService {
     constructor(private readonly authService: AuthService,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>, 
-        @InjectRepository(Event)
-        private readonly eventRepository: Repository<Event>
+        private readonly userRepository: Repository<User>
     ) { }
-    
-    
-    async getUserById(id){
-        const user = await this.userRepository.createQueryBuilder('user')
-        .leftJoinAndSelect('user.organized', 'event').where({id:id}).getMany();
 
-        if(user.length === 0){
-            throw new BadRequestException('User not found')
+
+    async listUser(options: IOptions) {
+        const take = options.limit || 100;
+        const page = options.page || 1;
+        const skip = (take * (page - 1));
+
+        const user = await this.userRepository.find({ take: take, skip: skip, where: { jobTitble: options.jobTitble } });
+        if (!user.length) {
+            throw new BadRequestException('List user is empty')
         }
         return user;
     }
 
 
-    async CreateUser(createUserDTO: CreateUserDTO) {
+
+    async createUser(createUserDTO: UserDTO) {
         const user = new User();
 
         if (createUserDTO.password !== createUserDTO.retypePassword) {
@@ -46,6 +51,10 @@ export class UserService {
         user.email = createUserDTO.email;
         user.firstName = createUserDTO.firstName;
         user.lastName = createUserDTO.lastName;
+        user.sex = createUserDTO.sex;
+        user.phoneNumber = createUserDTO.phoneNumber;
+        user.isActive = createUserDTO.isActive;
+        user.jobTitble = createUserDTO.jobTitble;
         const savedUser = await this.userRepository.save(user);
         if (savedUser) {
             return {
@@ -55,5 +64,20 @@ export class UserService {
         } else {
             throw new BadRequestException('saving failed')
         }
+    }
+
+    async updateUser(id:number, input : UserDTO){
+        const user = await this.userRepository.findOne({where: {id:id}})
+        if(!user){
+             throw new NotFoundException('User Not Found')
+        }
+
+        const userUpdated = await this.userRepository.save({
+            ...user, ...input
+        })
+        if(!userUpdated){
+            throw new BadRequestException('Saving Faild')
+        }
+
     }
 }
