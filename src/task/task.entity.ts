@@ -1,9 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Project } from "src/project/project.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Task {
     @PrimaryGeneratedColumn()
-    taskID: number;
+    taskId: number;
     @Column()
     name: string;
     @Column()
@@ -14,4 +15,7 @@ export class Task {
     timeEnd: string;
     @Column()
     note: string
+
+    @ManyToOne(()=>Project,(project)=>project.tasks)
+    project: Project
 }

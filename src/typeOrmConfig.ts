@@ -2,6 +2,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
 import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from "@nestjs/typeorm"
 import { User } from './user/user.entity';
 import { Task } from "./task/task.entity";
+import { Client } from "./clients/client.entity";
+import { Project } from "./project/project.entity";
 
 class TypeOrmConfig {
     static getOrmConfig(configService: ConfigService): TypeOrmModuleOptions {
@@ -12,7 +14,7 @@ class TypeOrmConfig {
             username: configService.get('USER'),
             password: configService.get('PASSWORD'),
             database: configService.get('DATABASE'),
-            entities: [User,Task],
+            entities: [User, Task, Client, Project],
             synchronize: true
         }
     }

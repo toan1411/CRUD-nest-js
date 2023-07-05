@@ -62,7 +62,7 @@ export class UserService {
                 token: this.authService.getTokenForUser(user)
             }
         } else {
-            throw new BadRequestException('saving failed')
+            throw new BadRequestException('Saving failed')
         }
     }
 
@@ -76,7 +76,7 @@ export class UserService {
             ...user, ...input
         })
         if(!userUpdated){
-            throw new BadRequestException('Saving Faild')
+            throw new BadRequestException('Saving Failed')
         }
 
     }

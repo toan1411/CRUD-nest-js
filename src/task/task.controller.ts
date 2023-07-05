@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, Param, Query } from '@nestjs/common';
 import { TaskService } from './task.service';
 
 @Controller('/task')
@@ -6,14 +6,19 @@ export class TaskController {
     constructor(private readonly taskService: TaskService) { }
     @Get()
     async getAllTask(@Query('limit') limit: number, @Query('page') page: number,
-        @Query('filter') name: string, @Query('keyword') keyword: string) {
+        @Query('status') status: string, @Query('keyword') keyword: string) {
         const options = {
             limit: limit,
             page: page,
-            name: name,
+            status: status,
             keyword: keyword
         }
-
         return await this.taskService.getAllTask(options)
+    }
+
+    @Delete(":id")
+    @HttpCode(204)
+    async removeTask(@Param("id") id){
+        return this.taskService.removeTask(id)
     }
 }
