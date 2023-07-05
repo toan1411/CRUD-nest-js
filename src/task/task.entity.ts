@@ -10,9 +10,9 @@ export class Task {
     @Column()
     status: string;
     @Column()
-    timeStart: string;
+    timeStart: Date;
     @Column()
-    timeEnd: string;
+    timeEnd: Date;
     @Column()
     note: string
 

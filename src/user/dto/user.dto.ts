@@ -1,4 +1,5 @@
-import { IsBoolean, IsEmail, Length } from "class-validator";
+import { IsBoolean, IsEmail, IsNumber, Length } from "class-validator";
+
 
 export class UserDTO{
     @Length(5)
@@ -21,4 +22,6 @@ export class UserDTO{
     jobTitble: string;
     @IsEmail()
     email: string;
+    @IsNumber()
+    idOfProject: number;
 }

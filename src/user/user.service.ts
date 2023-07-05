@@ -4,6 +4,7 @@ import { User } from "./user.entity";
 import { Repository } from "typeorm";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { UserDTO } from "./dto/user.dto";
+import { Project } from "src/project/project.entity";
 interface IOptions {
     page: number,
     limit: number,
@@ -15,7 +16,9 @@ interface IOptions {
 export class UserService {
     constructor(private readonly authService: AuthService,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>
+        private readonly userRepository: Repository<User>, 
+        @InjectRepository(Project)
+        private readonly projectRepository: Repository<Project>
     ) { }
 
 
@@ -36,6 +39,12 @@ export class UserService {
     async createUser(createUserDTO: UserDTO) {
         const user = new User();
 
+        const project = await this.projectRepository.findOne({where:{id:createUserDTO.idOfProject}})
+
+        if(!project){
+            throw new NotFoundException("Project Not Found")
+        }
+
         if (createUserDTO.password !== createUserDTO.retypePassword) {
             throw new BadRequestException('PassWord or UserName are not identical')
         }
@@ -55,6 +64,7 @@ export class UserService {
         user.phoneNumber = createUserDTO.phoneNumber;
         user.isActive = createUserDTO.isActive;
         user.jobTitble = createUserDTO.jobTitble;
+        user.project = project;
         const savedUser = await this.userRepository.save(user);
         if (savedUser) {
             return {

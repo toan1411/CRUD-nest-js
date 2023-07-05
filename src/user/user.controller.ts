@@ -28,7 +28,7 @@ export class UserController {
     }
 
     @Patch(':id')
-    async updateUser(@Param('id') id, @Body() input: UserDTO) {
+    async updateUser(@Param('id') id :number, @Body() input: UserDTO) {
         return await this.userService.updateUser(id,input)
     }
 }

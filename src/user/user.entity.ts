@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Project } from "src/project/project.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -23,5 +24,8 @@ export class User {
     isActive: boolean;
     @Column()
     jobTitble: string;
+
+    @ManyToOne(()=>Project, (project)=>project.users)
+    project: Project;
 
 }

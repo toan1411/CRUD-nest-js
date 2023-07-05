@@ -12,26 +12,30 @@ export class ProjectService {
         private readonly projectRepository: Repository<Project>,
         @InjectRepository(Client)
         private readonly clientRepository: Repository<Client>
-    ){}
-    
-    async getAllProject(){
-        const projects = await this.projectRepository.find()
-        if(!projects){
+    ) { }
+
+    async getAllProject() {
+        const projects = await this.projectRepository.createQueryBuilder("project")
+        .leftJoinAndSelect("project.tasks","task")
+        .leftJoinAndSelect("project.users","user").getMany()
+        if (!projects) {
             throw new NotFoundException("Project Not Found")
         }
+        return projects;
     }
-    async createProject(input : ProjectDto){
-        const client = await this.clientRepository.findOne({where:{id:input.idOfClient}})
-        if(!client){
+    async createProject(input: ProjectDto) {
+        const client = await this.clientRepository.findOne({ where: { id: input.idOfClient } })
+        if (!client) {
             throw new NotFoundException("Client Not Found")
         }
-        const created = await this.projectRepository.save({...input, client: client})
+        delete input.idOfClient;
+        const created = await this.projectRepository.save({ ...input, client: client })
 
-        if(!created){
+        if (!created) {
             throw new BadRequestException("saving failed")
         }
 
         return created;
     }
-    
+
 }

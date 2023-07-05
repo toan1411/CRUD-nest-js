@@ -1,6 +1,6 @@
 import { Length } from "class-validator";
 
-export class ClientDto{
+export class CreateClientDto{
     @Length(5)
     username: string;
     @Length(2)
@@ -9,4 +9,5 @@ export class ClientDto{
     lastname: string;
     @Length(2)
     local: string;
+
 }

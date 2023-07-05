@@ -7,7 +7,7 @@ export class ProjectController {
     constructor(private readonly projectService: ProjectService) { }
     @Get()
     async getAllProject() {
-
+        return await this.projectService.getAllProject()
     }
 
     @Post()

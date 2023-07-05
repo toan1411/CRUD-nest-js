@@ -1,5 +1,6 @@
 import { Client } from "src/clients/client.entity";
 import { Task } from "src/task/task.entity";
+import { User } from "src/user/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -17,5 +18,8 @@ export class Project {
     client: Client;
 
     @OneToMany(()=>Task, (task)=>task.project)
-    tasks : Task[]
+    tasks : Task[];
+
+    @OneToMany(()=>User, (user)=>user.project)
+    users: User[];
 }

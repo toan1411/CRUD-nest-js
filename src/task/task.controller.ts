@@ -1,5 +1,6 @@
-import { Controller, Delete, Get, HttpCode, Param, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
 import { TaskService } from './task.service';
+import { CreateTaskDto } from './create-task.dto';
 
 @Controller('/task')
 export class TaskController {
@@ -14,6 +15,11 @@ export class TaskController {
             keyword: keyword
         }
         return await this.taskService.getAllTask(options)
+    }
+
+    @Post()
+    async createTask(@Body() input : CreateTaskDto){
+        return this.taskService.createTask(input);
     }
 
     @Delete(":id")
