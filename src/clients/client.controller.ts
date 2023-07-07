@@ -1,16 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 
 @Controller('client')
 export class ClientsController {
-    constructor(private readonly clientService: ClientService) {
-    }
+    constructor(private readonly clientService: ClientService) {}
 
     @Get()
-    async getAllClients() {
-        return this.clientService.getAllClients()
+    async getAllClients(@Query('page') page : number, @Query('limit') limit : number, @Query('local') local : string) { 
+        const options = {page: page, limit:limit, local: local}
+        return this.clientService.getAllClients(options)
     }
 
     @Post()

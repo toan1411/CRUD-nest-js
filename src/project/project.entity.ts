@@ -7,10 +7,13 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 export class Project {
     @PrimaryGeneratedColumn()
     id: number;
+    
     @Column()
     name: string;
+
     @Column()
     timeStart: Date;
+
     @Column()
     timeEnd: Date;
 

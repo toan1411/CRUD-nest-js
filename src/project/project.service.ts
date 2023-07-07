@@ -14,10 +14,12 @@ export class ProjectService {
         private readonly clientRepository: Repository<Client>
     ) { }
 
-    async getAllProject() {
+    async getAllProject(page: number, limt: number) {
+        const skip = limt*(page-1)
         const projects = await this.projectRepository.createQueryBuilder("project")
         .leftJoinAndSelect("project.tasks","task")
-        .leftJoinAndSelect("project.users","user").getMany()
+        .leftJoinAndSelect("project.client", "client")
+        .leftJoinAndSelect("project.users","user").take(limt).skip(skip).getMany()
         if (!projects) {
             throw new NotFoundException("Project Not Found")
         }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { ProjectDto } from './project.dto';
 
@@ -6,8 +6,8 @@ import { ProjectDto } from './project.dto';
 export class ProjectController {
     constructor(private readonly projectService: ProjectService) { }
     @Get()
-    async getAllProject() {
-        return await this.projectService.getAllProject()
+    async getAllProject(@Query('page') page: number, @Query('limit') limt: number) {
+        return await this.projectService.getAllProject(page,limt)
     }
 
     @Post()

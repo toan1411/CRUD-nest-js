@@ -14,6 +14,6 @@ export class Client {
     @Column()
     local: string;
 
-    @OneToMany(()=>Project, (project)=> project.client)
+    @OneToMany(() => Project, (project) => project.client)
     projects: Project[];
 }

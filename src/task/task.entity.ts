@@ -5,14 +5,19 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 export class Task {
     @PrimaryGeneratedColumn()
     taskId: number;
+
     @Column()
     name: string;
+
     @Column()
     status: string;
+
     @Column()
     timeStart: Date;
+
     @Column()
     timeEnd: Date;
+    
     @Column()
     note: string
 

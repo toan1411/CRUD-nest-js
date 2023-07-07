@@ -5,16 +5,13 @@ import { UserModule } from "./user/user.module";
 import { ClientModule } from './clients/client.module';
 import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
-import { typeOrmAsyncConfig } from "./typeOrm.config";
-
-
-
-
+import { typeOrmConfigAsync } from "./typeOrm.config";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
-    imports: [
-        TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
-         AuthModule, UserModule, ClientModule, TaskModule, ProjectModule],
+    imports: [ConfigModule.forRoot({isGlobal: true}),
+        TypeOrmModule.forRootAsync(typeOrmConfigAsync),
+        AuthModule, UserModule, ClientModule, TaskModule, ProjectModule],
     controllers: [],
     providers: [],
 })

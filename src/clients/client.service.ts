@@ -11,13 +11,23 @@ export class ClientService {
         private readonly clientRepository: Repository<Client>
     ) { }
 
-    async getAllClients() {
-        const client = await this.clientRepository.createQueryBuilder("client")
-            .leftJoinAndSelect("client.projects", "project").getMany();
-        if (!client) {
+    async getAllClients(options) {
+        const take = options.limit||100;
+        const skip = take*(options.page-1)||0;
+        let clients;
+        if(options.local){
+            clients = await this.clientRepository.createQueryBuilder("client")
+            .leftJoinAndSelect("client.projects", "project").take(take).skip(skip)
+            .where("client.local =:local",{local: options.local}).getMany();
+        }else{
+            clients = await this.clientRepository.createQueryBuilder("client")
+            .leftJoinAndSelect("client.projects", "project").take(take).skip(skip).getMany()
+        }
+        
+        if (!clients) {
             throw new NotFoundException("Clients not found")
         }
-        return client;
+        return clients;
     }
 
     async createClient(input) {

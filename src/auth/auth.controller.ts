@@ -1,9 +1,9 @@
-import {  Controller, Get, Post, UseGuards } from "@nestjs/common";
+import {  Controller, Post, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOperation, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import { LoginDto } from "./login.dto";
+import { ApiBody, ApiCreatedResponse, ApiOperation, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { LoginDto } from "./dto/login.dto";
 import { User } from "src/user/user.entity";
 
 
@@ -25,13 +25,5 @@ export class AuthController {
             userID: user.id,
             token: this.authService.getTokenForUser(user)
         }
-    }
-
-    @Get('profile')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'show profile of user' })
-    @UseGuards(AuthGuard('jwt'))
-    async getProfile(@CurrentUser() user : User) {
-        return user;
-    }
+    } 
 }

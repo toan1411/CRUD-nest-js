@@ -1,48 +1,30 @@
+import { ConfigModule, ConfigService } from "@nestjs/config"
 import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from "@nestjs/typeorm"
-import { Client } from "./clients/client.entity"
-import { User } from "./user/user.entity"
-import { Project } from "./project/project.entity"
-import { Task } from "./task/task.entity"
+import { User } from './user/user.entity';
+import { Task } from "./task/task.entity";
+import { Client } from "./clients/client.entity";
+import { Project } from "./project/project.entity";
 
-
-export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
-    useFactory: async (): Promise<TypeOrmModuleOptions> => {
+class TypeOrmConfig {
+    static getOrmConfig(configService: ConfigService): TypeOrmModuleOptions {
         return {
             type: 'mysql',
-            port: parseInt(process.env.PORT),
-            host: process.env.HOST,
-            username: process.env.USER,
-            password: process.env.PASSWORD,
-            database: process.env.DATABASE,
-            entities: [Client,User,Project,Task],
-            migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-            cli: {
-                migrationsDir: __dirname + '/../database/migrations',
-              },
-            extra: {
-                charset: 'utf8mb4_unicode_ci',
-            },
-            synchronize: false,
-            logging: true
+            port: parseInt(configService.get('PORT_DATA')),
+            host: configService.get('HOST'),
+            username: configService.get('USER'),
+            password: configService.get('PASSWORD'),
+            database: configService.get('DATABASE'),
+            entities: [User, Task, Client, Project],
+            synchronize: true
         }
     }
 }
 
-export const typeOrmConfig: TypeOrmModuleOptions = {
-    type: 'mysql',
-    port: parseInt(process.env.PORT),
-    host: process.env.HOST,
-    username: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    entities: [Client,User,Project,Task],
-    migrations: [__dirname + '/./database/migrations/*.ts'],
-    cli: {
-        migrationsDir: __dirname + '/./database/migrations',
-      },
-    extra: {
-        charset: 'utf8mb4_unicode_ci',
-    },
-    logging: true
-}
+export const typeOrmConfigAsync: TypeOrmModuleAsyncOptions = {
 
+    imports: [ConfigModule],
+
+    useFactory: async (configService: ConfigService) => TypeOrmConfig.getOrmConfig(configService),
+    inject: [ConfigService]
+
+}

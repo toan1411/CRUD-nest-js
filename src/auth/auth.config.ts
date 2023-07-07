@@ -1,13 +1,24 @@
-import { JwtModuleAsyncOptions } from "@nestjs/jwt";
 
-export const jwtConfig : JwtModuleAsyncOptions = {
-    useFactory: ()=>{
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModuleAsyncOptions, JwtModuleOptions } from "@nestjs/jwt";
+
+
+export class JwtConfig {
+    static getConfigJwt(configService: ConfigService): JwtModuleOptions {
         return {
-            secret: process.env.AUTH_SECRET,
+            secret: configService.get('AUTH_SECRET'),
             signOptions: {
-                expiresIn: process.env.EXPIRES_IN
+                expiresIn:configService.get('EXPIRES_IN')
             }
         }
     }
 }
 
+export const jwtConfigAsync: JwtModuleAsyncOptions = {
+
+    imports: [ConfigModule],
+
+    useFactory: async (configService: ConfigService) => JwtConfig.getConfigJwt(configService),
+    inject: [ConfigService]
+
+}

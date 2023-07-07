@@ -3,7 +3,7 @@ import { AuthService } from "../auth/auth.service";
 import { User } from "./user.entity";
 import { Repository } from "typeorm";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { UserDTO } from "./dto/user.dto";
+import { CreateUserDTO } from "./dto/create-user.dto";
 import { Project } from "src/project/project.entity";
 interface IOptions {
     page: number,
@@ -16,11 +16,10 @@ interface IOptions {
 export class UserService {
     constructor(private readonly authService: AuthService,
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>, 
+        private readonly userRepository: Repository<User>,
         @InjectRepository(Project)
         private readonly projectRepository: Repository<Project>
     ) { }
-
 
     async listUser(options: IOptions) {
         const take = options.limit || 100;
@@ -36,12 +35,12 @@ export class UserService {
 
 
 
-    async createUser(createUserDTO: UserDTO) {
+    async createUser(createUserDTO: CreateUserDTO) {
         const user = new User();
 
-        const project = await this.projectRepository.findOne({where:{id:createUserDTO.idOfProject}})
+        const project = await this.projectRepository.findOne({ where: { id: createUserDTO.idOfProject } })
 
-        if(!project){
+        if (!project) {
             throw new NotFoundException("Project Not Found")
         }
 
@@ -76,16 +75,16 @@ export class UserService {
         }
     }
 
-    async updateUser(id:number, input : UserDTO){
-        const user = await this.userRepository.findOne({where: {id:id}})
-        if(!user){
-             throw new NotFoundException('User Not Found')
+    async updateUser(id: number, input: CreateUserDTO) {
+        const user = await this.userRepository.findOne({ where: { id: id } })
+        if (!user) {
+            throw new NotFoundException('User Not Found')
         }
 
         const userUpdated = await this.userRepository.save({
             ...user, ...input
         })
-        if(!userUpdated){
+        if (!userUpdated) {
             throw new BadRequestException('Saving Failed')
         }
 
