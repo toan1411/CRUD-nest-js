@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Like, Repository } from 'typeorm';
 import { Project } from 'src/project/project.entity';
-import { CreateTaskDto } from './create-task.dto';
+import { CreateTaskDto } from './dto/create-task.dto';
 
 interface IOptions {
     page: number,

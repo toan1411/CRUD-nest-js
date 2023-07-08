@@ -5,12 +5,16 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 export class Client {
     @PrimaryGeneratedColumn()
     id: number;
+
     @Column()
     username: string;
+
     @Column()
     fristname: string;
+
     @Column()
     lastname: string;
+    
     @Column()
     local: string;
 

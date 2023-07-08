@@ -8,10 +8,8 @@ import { AuthService } from "./auth.service";
 import { jwtConfigAsync } from "./auth.config";
 import { JwtStrategy } from "./strategy/jwt.strategy";
 
-
 @Module({
     imports: [
-
         TypeOrmModule.forFeature([User]),
         JwtModule.registerAsync(jwtConfigAsync)
     ],

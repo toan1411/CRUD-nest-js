@@ -5,12 +5,12 @@ import { UserModule } from "./user/user.module";
 import { ClientModule } from './clients/client.module';
 import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
-import { typeOrmConfigAsync } from "./typeOrm.config";
 import { ConfigModule } from "@nestjs/config";
+import { dataSourceOptions } from "db/data-source";
 
 @Module({
     imports: [ConfigModule.forRoot({isGlobal: true}),
-        TypeOrmModule.forRootAsync(typeOrmConfigAsync),
+        TypeOrmModule.forRoot(dataSourceOptions),
         AuthModule, UserModule, ClientModule, TaskModule, ProjectModule],
     controllers: [],
     providers: [],

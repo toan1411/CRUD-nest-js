@@ -11,7 +11,6 @@ import { User } from "src/user/user.entity";
 
 @Controller('auth')
 export class AuthController {
-
     constructor(private readonly authService: AuthService) { }
 
     @Post('login')
