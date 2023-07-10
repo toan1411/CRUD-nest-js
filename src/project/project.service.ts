@@ -15,11 +15,12 @@ export class ProjectService {
     ) { }
 
     async getAllProject(page: number, limt: number) {
-        const skip = limt*(page-1)
+        const skip = limt*(page-1)||0;
         const projects = await this.projectRepository.createQueryBuilder("project")
         .leftJoinAndSelect("project.tasks","task")
         .leftJoinAndSelect("project.client", "client")
-        .leftJoinAndSelect("project.users","user").take(limt).skip(skip).getMany()
+        .leftJoinAndSelect("project.users","user")
+        .leftJoinAndSelect('project.timesheet','timeseheet').take(limt).skip(skip).getMany()
         if (!projects) {
             throw new NotFoundException("Project Not Found")
         }

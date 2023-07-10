@@ -7,12 +7,18 @@ import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module';
 import { ConfigModule } from "@nestjs/config";
 import { dataSourceOptions } from "db/data-source";
+import { TimesheetModule } from './timesheet/timesheet.module';
+import { RolesGuard } from "./user/role.guard";
+import { APP_GUARD } from "@nestjs/core";
 
 @Module({
     imports: [ConfigModule.forRoot({isGlobal: true}),
         TypeOrmModule.forRoot(dataSourceOptions),
-        AuthModule, UserModule, ClientModule, TaskModule, ProjectModule],
+        AuthModule, UserModule, ClientModule, TaskModule, ProjectModule, TimesheetModule],
     controllers: [],
-    providers: [],
+    providers: [{
+        provide: APP_GUARD,
+        useClass: RolesGuard,
+      }],
 })
 export class AppModule { }

@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "../user/user.entity";
+import { User } from "../user/entities/user.entity";
 import * as bcrypt from 'bcrypt'
 import { ConfigService } from "@nestjs/config";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -23,12 +23,12 @@ export class AuthService {
         })
     }
 
-    public async checkPassword(username : string, password : string): Promise<User>{  
+    public async checkPassword(username: string, password: string): Promise<User> {
         const user = await this.userRepository.findOne({ where: { username: username } });
         if (!user) {
             throw new UnauthorizedException("Username or password not correctly");
         }
-      
+
         const isEqual = await bcrypt.compare(password, user.password)
         if (!isEqual) {
             this.logger.debug(`Invalid credentials for user ${username}`);

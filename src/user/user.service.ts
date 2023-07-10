@@ -1,10 +1,12 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { AuthService } from "../auth/auth.service";
-import { User } from "./user.entity";
-import { Repository } from "typeorm";
+import { User } from "./entities/user.entity";
+import { Admin, Repository } from "typeorm";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDTO } from "./dto/create-user.dto";
 import { Project } from "src/project/project.entity";
+import { threadId } from "worker_threads";
+import { Role } from "./entities/role.enum";
 interface IOptions {
     page: number,
     limit: number,
@@ -33,8 +35,6 @@ export class UserService {
         return user;
     }
 
-
-
     async createUser(createUserDTO: CreateUserDTO) {
         const user = new User();
 
@@ -43,9 +43,8 @@ export class UserService {
         if (!project) {
             throw new NotFoundException("Project Not Found")
         }
-
         if (createUserDTO.password !== createUserDTO.retypePassword) {
-            throw new BadRequestException('PassWord or UserName are not identical')
+            throw new BadRequestException('PassWord and retype password are not macth')
         }
 
         const existingUser = await this.userRepository.findOne({ where: [{ username: createUserDTO.username }, { email: createUserDTO.email }] })
@@ -64,6 +63,7 @@ export class UserService {
         user.isActive = createUserDTO.isActive;
         user.jobTitble = createUserDTO.jobTitble;
         user.project = project;
+        user.roles = [Role.ADMIN]
         const savedUser = await this.userRepository.save(user);
         if (savedUser) {
             return {
@@ -87,6 +87,16 @@ export class UserService {
         if (!userUpdated) {
             throw new BadRequestException('Saving Failed')
         }
+    }
 
+    async removeUser(id: number){
+        const user = await this.userRepository.findOne({where:{id:id}})
+        if(!user){
+            throw new NotFoundException('User Not Found')
+        }
+        const userDelete = await this.userRepository.remove(user)
+        if(!userDelete){
+            throw new BadRequestException('Delete failed')
+        }
     }
 }

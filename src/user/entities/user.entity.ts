@@ -1,5 +1,7 @@
 import { Project } from "src/project/project.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Timesheet } from "src/timesheet/timesheet.entity";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Role } from "./role.enum";
 
 
 @Entity()
@@ -34,7 +36,13 @@ export class User {
     @Column()
     jobTitble: string;
 
+    roles: Role[];
+
     @ManyToOne(()=>Project, (project)=>project.users)
     project: Project;
+
+    @OneToOne(()=>Timesheet, (timeseheet)=>timeseheet.user)
+    timesheet: Timesheet;
+
 
 }
