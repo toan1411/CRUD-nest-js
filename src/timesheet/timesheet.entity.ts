@@ -1,7 +1,7 @@
-
 import { Project } from "src/project/project.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Status } from "./dto/status.enum";
 
 @Entity()
 export class Timesheet {
@@ -11,8 +11,11 @@ export class Timesheet {
   @Column()
   name: string;
 
-  @Column()
-  status: string;
+  @Column("set", {
+    enum: Status,
+    default: Status.New
+  })
+  status: Status;
 
   @Column()
   note: string;

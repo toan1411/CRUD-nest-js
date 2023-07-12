@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Timesheet } from './timesheet.entity';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Project } from 'src/project/project.entity';
+import { Status } from './dto/status.enum';
 
 @Injectable()
 export class TimesheetService {
@@ -16,12 +17,12 @@ export class TimesheetService {
         private readonly projectRepository: Repository<Project>
     ) { }
 
-    async getAllTimesheet(page: number, limit: number, status : string) {
+    async getAllTimesheet(page: number, limit: number, status: string) {
         const skip = limit * (page - 1) || 0;
 
         const timesheet = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.project', 'project')
-            .leftJoinAndSelect('timesheet.user', 'user').take(limit).skip(skip).where({status:status}).getMany()
+            .leftJoinAndSelect('timesheet.user', 'user').take(limit).skip(skip).where({ status: status }).getMany()
 
         if (!timesheet) {
             throw new NotFoundException('Timesheet Not Found')
@@ -52,7 +53,6 @@ export class TimesheetService {
         if (!saved) {
             throw new BadRequestException('Saving failed')
         }
-
         return saved
     }
 
@@ -73,9 +73,32 @@ export class TimesheetService {
     async removeTimesheet(id: number) {
         const timesheet = await this.timesheetRepository.findOne({ where: { id: id } });
         const removed = await this.timesheetRepository.remove(timesheet);
-
         if (!removed) {
             throw new BadRequestException('Delete failed')
         }
+    }
+
+    async getTimeSheetByDay(date) {
+        const timesheet = await this.timesheetRepository.find({ where: { date: Equal(new Date(date.year, date.month, date.day)) } })
+      //  console.log(date === new Date(2023, 10, 2))
+        const a = new Date('2023-11-10');
+        console.log("A",a)
+        //console.log(new Date(`${date.year}-${date.month}-${date.day+1}`))
+        if (timesheet.length === 0) {
+            throw new NotFoundException('Timesheet Not Found')
+        }
+        return timesheet
+    }
+
+    async approveTimesheet() {
+        const timesheets = await this.timesheetRepository.find({ where: { status: Status.Pending } })
+        console.log(timesheets)
+        if (!timesheets) {
+            throw new NotFoundException('Timesheet Not Found')
+        }
+        for (const timesheet of timesheets) {
+            timesheet.status = Status.Approved;
+        }
+        return timesheets
     }
 }

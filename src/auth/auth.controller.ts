@@ -17,7 +17,7 @@ export class AuthController {
     @UseGuards(AuthGuard('local'))
     @ApiOperation({ summary: 'user login here' })
     @ApiUnauthorizedResponse()
-    @ApiBody({ type: LoginDto })
+    @ApiBody({ type: LoginDto})
     @ApiCreatedResponse()
     async login(@CurrentUser() user: User) {
         return {

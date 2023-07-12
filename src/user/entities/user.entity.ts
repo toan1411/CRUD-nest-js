@@ -6,6 +6,7 @@ import { Role } from "./role.enum";
 
 @Entity()
 export class User {
+
     @PrimaryGeneratedColumn()
     id: number;
     
@@ -33,9 +34,10 @@ export class User {
     @Column()
     isActive: boolean;
 
-    @Column()
-    jobTitble: string;
-
+    @Column( "set",{
+        enum: Role,
+        default: [Role.USER]
+      })
     roles: Role[];
 
     @ManyToOne(()=>Project, (project)=>project.users)
