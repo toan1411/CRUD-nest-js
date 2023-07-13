@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Like, Repository } from 'typeorm';
 import { Project } from 'src/project/project.entity';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { CreateTaskDto } from './dto/createTask.dto';
+import { UpdateTaskDto } from './dto/updateTask.dto';
 
 interface IOptions {
     page: number,
@@ -60,8 +61,21 @@ export class TaskService {
         return task
     }
 
+    async updateTask(input: UpdateTaskDto, id: number ){
+        const task = this.taskRepository.findOne({where:{id:id}})
+        if(!task){
+            throw new NotFoundException('Task Not Found')
+        }
+        const taskSaved = this.taskRepository.save({...task,...input});
+        if(!taskSaved){
+            throw new BadRequestException('Saving failed')
+        }
+        return taskSaved;
+    }
+     
+
     async removeTask(id: number) {
-        const task = await this.taskRepository.find({ where: { taskId: id } });
+        const task = await this.taskRepository.find({ where: { id: id } });
         if (!task) {
             throw new NotFoundException("Task Not Found");
         }
@@ -70,6 +84,5 @@ export class TaskService {
             throw new BadRequestException("Removing failed")
         }
     }
-
 
 }

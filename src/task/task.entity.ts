@@ -4,7 +4,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 @Entity()
 export class Task {
     @PrimaryGeneratedColumn()
-    taskId: number;
+    id: number;
 
     @Column()
     name: string;

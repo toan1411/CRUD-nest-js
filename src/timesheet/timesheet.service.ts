@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Timesheet } from './timesheet.entity';
-import { Equal, Repository } from 'typeorm';
+import {LessThan, MoreThan, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Project } from 'src/project/project.entity';
 import { Status } from './dto/status.enum';
+
 
 @Injectable()
 export class TimesheetService {
@@ -32,11 +33,22 @@ export class TimesheetService {
     }
 
     async getTimesheetById(id: number) {
-        const timesheet = this.timesheetRepository.findOne({ where: { id: id } })
+        const timesheet = await this.timesheetRepository.findOne({ where: { id: id } })
         if (!timesheet) {
             throw new NotFoundException('Timesheet Not Found')
         }
         return timesheet;
+    }
+
+    async getTimesheet(user: User){
+        const timeseheet = await this.timesheetRepository.createQueryBuilder('timesheet')
+        .leftJoinAndSelect("timesheet.user","user")
+        .select(['timesheet.name','timesheet.status','timesheet.note','timesheet.date'])
+        .where({user: user}).getMany()
+        if(!timeseheet){
+            throw new NotFoundException('Timesheet Not Found')
+        }
+        return timeseheet;
     }
 
     async createTimesheet(input) {
@@ -78,16 +90,19 @@ export class TimesheetService {
         }
     }
 
-    async getTimeSheetByDay(date) {
-        const timesheet = await this.timesheetRepository.find({ where: { date: Equal(new Date(date.year, date.month, date.day)) } })
-      //  console.log(date === new Date(2023, 10, 2))
-        const a = new Date('2023-11-10');
-        console.log("A",a)
-        //console.log(new Date(`${date.year}-${date.month}-${date.day+1}`))
-        if (timesheet.length === 0) {
+    async submitTimesheet(user: User){
+        const timesheet = await this.timesheetRepository.createQueryBuilder("timesheet")
+                        .leftJoinAndSelect("timesheet.user","user")
+                        .select(['timesheet.name','timesheet.status','timesheet.note','timesheet.date'])
+                        .where({user: user}).getMany()
+        if(!timesheet){
             throw new NotFoundException('Timesheet Not Found')
         }
-        return timesheet
+        const timesheetSaved = await this.timesheetRepository.save({...timesheet, status : Status.Pending})
+        if(!timesheetSaved){
+            throw new BadRequestException('Submit failed!!!')
+        }
+        return timesheetSaved;
     }
 
     async approveTimesheet() {
@@ -100,5 +115,34 @@ export class TimesheetService {
             timesheet.status = Status.Approved;
         }
         return timesheets
+    }
+
+    async getTimeSheetByDay(date) {
+        const day = new Date(`${date.year}-${date.month}-${date.day}`)
+        const timesheet = await this.timesheetRepository
+                    .createQueryBuilder("timsheet")
+                    .where({date: day.toISOString().substring(0, 10)})
+                    .getMany();
+
+        if(!timesheet){
+            throw new NotFoundException('Timesheet Not Found')
+        }
+        return timesheet
+    }
+
+    async getTimesheetByWeek(date){
+        const dateStart = new Date(`${date.yearStart}-${date.monthStart}-${date.dayStart}`);
+        const dateEnd = new Date(`${date.yearEnd}-${date.monthEnd}-${date.dayEnd}`)
+        if(dateEnd<dateStart){
+            throw new BadRequestException("date start is greater than date end")
+        }
+        const timeseheet = await this.timesheetRepository.createQueryBuilder("timesheet")
+                    .where({date: MoreThan( dateStart.toISOString().substring(0,10))})
+                    .andWhere({date: LessThan(dateEnd.toISOString().substring(0,10))})
+                    .getMany();
+        if(!timeseheet){
+            throw new NotFoundException('Timesheet Not Found')
+        }
+        return timeseheet;
     }
 }

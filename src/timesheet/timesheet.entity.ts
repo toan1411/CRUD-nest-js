@@ -1,7 +1,9 @@
 import { Project } from "src/project/project.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Status } from "./dto/status.enum";
+import { Transform, TransformFnParams } from "class-transformer";
+import moment from 'moment';
 
 @Entity()
 export class Timesheet {
@@ -20,12 +22,11 @@ export class Timesheet {
   @Column()
   note: string;
 
+  @Transform(({ value }: TransformFnParams) => moment(value).format('DD/MM/YY'))
   @Column()
   date: Date;
 
-  @OneToOne(() => Project, (project) => project.timesheet, {
-    cascade: true
-  })
+  @ManyToOne(() => Project, (project) => project.timesheets)
   @JoinColumn()
   project: Project;
 

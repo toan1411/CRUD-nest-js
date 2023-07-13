@@ -2,7 +2,7 @@ import { Client } from "src/clients/client.entity";
 import { Task } from "src/task/task.entity";
 import { Timesheet } from "src/timesheet/timesheet.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Project {
@@ -27,6 +27,6 @@ export class Project {
     @OneToMany(() => User, (user) => user.project)
     users: User[];
 
-    @OneToOne(() => Timesheet, (timesheet) => timesheet.project)
-    timesheet: Timesheet
+    @OneToMany(() => Timesheet, (timesheet) => timesheet.project)
+    timesheets: Timesheet[]
 }

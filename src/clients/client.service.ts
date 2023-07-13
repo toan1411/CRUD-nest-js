@@ -53,4 +53,15 @@ export class ClientService {
         }
         return saved;
     }
+
+    async removeClient(id: number){
+        const client = await this.clientRepository.findOne({where:{id:id}});
+        if(!client){
+            throw new NotFoundException("Client Not Found")
+        }
+        const removed = await this.clientRepository.remove(client);
+        if(!removed){
+            throw new BadRequestException('Removing failed')
+        }
+    }
 }

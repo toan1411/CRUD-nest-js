@@ -1,10 +1,13 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { IsDateString, IsNumber, Length } from "class-validator";
 
 export class CreateTaskDto{
     @Length(5)
+    @ApiProperty({example: "task"})
     name: string;
     
-    @Length(5)
+    @Length(3)
+    @ApiProperty({example: "none"})
     status: string;
 
     @IsDateString()
@@ -14,8 +17,10 @@ export class CreateTaskDto{
     timeEnd: Date;
 
     @Length(5)
+    @ApiProperty({example:'none'})
     note: string;
 
     @IsNumber()
+    @ApiProperty({example:'1'})
     idOfProject: number;
 }
