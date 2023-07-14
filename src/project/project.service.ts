@@ -33,12 +33,12 @@ export class ProjectService {
             throw new NotFoundException("Client Not Found")
         }
         delete input.idOfClient;
-        const created = await this.projectRepository.save({ ...input, client: client })
-
-        if (!created) {
+        try{
+            const created = await this.projectRepository.save({ ...input, client: client })
+            return created
+        }catch(error){
             throw new BadRequestException("saving failed")
         }
-        return created;
     }
 
     async updateProject(input: UpdateProjectDto, id: number){
@@ -46,20 +46,19 @@ export class ProjectService {
         if(!project){
             throw new NotFoundException('Project Not Found')
         }
-        const projectSaved = await this.projectRepository.save({...project,...input})
-        if(!projectSaved){
-            throw new BadRequestException('Saving failed')
+        try {
+            const projectSaved = await this.projectRepository.save({...project,...input})
+            return projectSaved
+        } catch (error) {
+            throw new BadRequestException('Saving failed')    
         }
-        return projectSaved;
     }
 
     async removeProject(id: number){
         const project = await this.projectRepository.findOne({where:{id:id}})
-        if(!project){
-            throw new NotFoundException('Project Not Found')
-        }
-        const projectRemoved = await this.projectRepository.remove(project)
-        if(!projectRemoved){
+        try {
+             this.projectRepository.remove(project)
+        } catch (error) {
             throw new BadRequestException('Deleting failed')
         }
     }

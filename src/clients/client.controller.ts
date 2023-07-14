@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Use
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import RoleGuard from 'src/auth/gaurd/role.guard';
+import RoleGuard from 'src/auth/guard/role.guard';
 import { Role } from 'src/user/entities/role.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -17,9 +17,9 @@ export class ClientsController {
     @Get()
     @ApiQuery({name: 'page', required: false})
     @ApiQuery({name: 'limit', required: false})
-    @ApiQuery({name: 'local', required: false})
-    async getAllClients(@Query('page') page : number, @Query('limit') limit : number, @Query('local') local : string) { 
-        const options = {page: page, limit:limit, local: local}
+    @ApiQuery({name: 'locale', required: false})
+    async getAllClients(@Query('page') page : number, @Query('limit') limit : number, @Query('locale') locale : string) { 
+        const options = {page: page, limit:limit, local: locale}
         return this.clientService.getAllClients(options)
     }
 

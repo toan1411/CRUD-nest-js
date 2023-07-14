@@ -2,12 +2,13 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Use
 import { TimesheetService } from './timesheet.service';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
-import RoleGuard from 'src/auth/gaurd/role.guard';
+import RoleGuard from 'src/auth/guard/role.guard';
 import { Role } from 'src/user/entities/role.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Day } from './dto/day.dto';
 
 
 @Controller('timesheet/')
@@ -67,12 +68,12 @@ export class TimesheetController {
         return await this.timesheetService.submitTimesheet(user)
     }
 
-    @Patch('/approved/')
+    @Get('approved')
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async approveTimesheet() {
-        return await this.timesheetService.approveTimesheet()
+    async approveTimesheet(@Body()date : Day) {
+        return await this.timesheetService.approveTimesheetByWeek(date)
     }
 
     @Get('day')

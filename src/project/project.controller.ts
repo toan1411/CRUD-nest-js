@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Use
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/createProject.dto';
 import { UpdateProjectDto } from './dto/updateProject.dto';
-import RoleGuard from 'src/auth/gaurd/role.guard';
+import RoleGuard from 'src/auth/guard/role.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from 'src/user/entities/role.enum';
 import { ApiBearerAuth } from '@nestjs/swagger';

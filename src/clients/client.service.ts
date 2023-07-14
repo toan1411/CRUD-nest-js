@@ -12,31 +12,27 @@ export class ClientService {
     ) { }
 
     async getAllClients(options) {
-        const take = options.limit||100;
-        const skip = take*(options.page-1)||0;
-        let clients;
-        if(options.local){
-            clients = await this.clientRepository.createQueryBuilder("client")
+        const take = options.limit || 100;
+        const skip = take * (options.page - 1) || 0;
+        let query = this.clientRepository.createQueryBuilder("client")
             .leftJoinAndSelect("client.projects", "project").take(take).skip(skip)
-            .where("client.local =:local",{local: options.local}).getMany();
-        }else{
-            clients = await this.clientRepository.createQueryBuilder("client")
-            .leftJoinAndSelect("client.projects", "project").take(take).skip(skip).getMany()
+        if (options.locale) {
+            query = query.where("client.local =:local", { locale: options.locale })
         }
-        
-        if (!clients) {
+        const client = await query.getMany()
+        if (!client) {
             throw new NotFoundException("Clients not found")
         }
-        return clients;
+        return client;
     }
 
     async createClient(input) {
-        const created = await this.clientRepository.save({ ...input });
-
-        if (!created) {
+        try {
+            const created = await this.clientRepository.save({ ...input });
+            return created;
+        } catch (error) {
             throw new BadRequestException("saving failed")
         }
-        return created;
     }
 
     async updateClient(id: number, input: UpdateClientDto) {
@@ -44,23 +40,25 @@ export class ClientService {
         if (!client) {
             throw new NotFoundException("Client Not Found")
         };
-        const saved = await this.clientRepository.save({
-            ...client,
-            ...input,
-        });
-        if (!saved) {
+        try{
+            const saved = await this.clientRepository.save({
+                ...client,
+                ...input,
+            });
+            return saved
+        }catch(error){
             throw new BadRequestException("Saving failed");
         }
-        return saved;
     }
 
-    async removeClient(id: number){
-        const client = await this.clientRepository.findOne({where:{id:id}});
-        if(!client){
+    async removeClient(id: number) {
+        const client = await this.clientRepository.findOne({ where: { id: id } });
+        if (!client) {
             throw new NotFoundException("Client Not Found")
         }
-        const removed = await this.clientRepository.remove(client);
-        if(!removed){
+        try{
+             this.clientRepository.remove(client);
+        }catch(error){
             throw new BadRequestException('Removing failed')
         }
     }

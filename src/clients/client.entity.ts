@@ -14,9 +14,9 @@ export class Client {
 
     @Column()
     lastname: string;
-    
+
     @Column()
-    local: string;
+    locale: string;
 
     @OneToMany(() => Project, (project) => project.client)
     projects: Project[];

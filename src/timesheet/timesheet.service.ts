@@ -5,6 +5,7 @@ import {LessThan, MoreThan, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Project } from 'src/project/project.entity';
 import { Status } from './dto/status.enum';
+import { Day } from './dto/day.dto';
 
 
 @Injectable()
@@ -20,7 +21,6 @@ export class TimesheetService {
 
     async getAllTimesheet(page: number, limit: number, status: string) {
         const skip = limit * (page - 1) || 0;
-
         const timesheet = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.project', 'project')
             .leftJoinAndSelect('timesheet.user', 'user').take(limit).skip(skip).where({ status: status }).getMany()
@@ -28,7 +28,6 @@ export class TimesheetService {
         if (!timesheet) {
             throw new NotFoundException('Timesheet Not Found')
         }
-
         return timesheet
     }
 
@@ -60,12 +59,12 @@ export class TimesheetService {
         if (!project) {
             throw new NotFoundException('Project Not Found')
         }
-        const saved = await this.timesheetRepository.save({ ...input, project: project, user: user })
-
-        if (!saved) {
+        try {
+            const saved = await this.timesheetRepository.save({ ...input, project: project, user: user })
+            return saved
+        } catch (error) {
             throw new BadRequestException('Saving failed')
         }
-        return saved
     }
 
     async updateTimesheet(input, id) {
@@ -73,19 +72,19 @@ export class TimesheetService {
         if (!timesheet) {
             throw new NotFoundException('Timesheet Not Found')
         }
-
-        const saved = await this.timesheetRepository.save({ ...timesheet, ...input })
-        if (!saved) {
+        try {
+            const saved = await this.timesheetRepository.save({ ...timesheet, ...input })
+            return saved
+        } catch (error) {
             throw new BadRequestException('Saving failed')
         }
-
-        return saved
     }
 
     async removeTimesheet(id: number) {
         const timesheet = await this.timesheetRepository.findOne({ where: { id: id } });
-        const removed = await this.timesheetRepository.remove(timesheet);
-        if (!removed) {
+        try {
+            this.timesheetRepository.remove(timesheet);
+        } catch (error) {
             throw new BadRequestException('Delete failed')
         }
     }
@@ -98,36 +97,59 @@ export class TimesheetService {
         if(!timesheet){
             throw new NotFoundException('Timesheet Not Found')
         }
-        const timesheetSaved = await this.timesheetRepository.save({...timesheet, status : Status.Pending})
-        if(!timesheetSaved){
+        try {
+            const timesheetSaved = await this.timesheetRepository.save({...timesheet, status : Status.Pending})
+            return timesheetSaved
+        } catch (error) {
             throw new BadRequestException('Submit failed!!!')
         }
-        return timesheetSaved;
     }
 
-    async approveTimesheet() {
-        const timesheets = await this.timesheetRepository.find({ where: { status: Status.Pending } })
-        console.log(timesheets)
-        if (!timesheets) {
+    async approveTimesheetByWeek(date: Day) {
+        const dateStart = new Date(`${date.yearStart}-${date.monthStart}-${date.dayStart}`);
+        const dateEnd = new Date(`${date.yearEnd}-${date.monthEnd}-${date.dayEnd}`)
+        if(dateEnd<dateStart){
+            throw new BadRequestException("date start is greater than date end")
+        }
+        const timesheets =await this.timesheetRepository.createQueryBuilder("timesheet")
+                    .where({date: MoreThan( dateStart.toISOString().substring(0,10))})
+                    .andWhere({date: LessThan(dateEnd.toISOString().substring(0,10))})
+                    .andWhere({ status: Status.Pending })
+                    .getMany();
+        if(!timesheets){
             throw new NotFoundException('Timesheet Not Found')
         }
         for (const timesheet of timesheets) {
             timesheet.status = Status.Approved;
         }
-        return timesheets
+        try {
+            const timesheetSaved = await this.timesheetRepository.save(timesheets)
+            return timesheetSaved    
+        } catch (error) {
+            throw new BadRequestException('Approving Failed')
+        }
     }
 
     async getTimeSheetByDay(date) {
         const day = new Date(`${date.year}-${date.month}-${date.day}`)
-        const timesheet = await this.timesheetRepository
+        const timesheets = await this.timesheetRepository
                     .createQueryBuilder("timsheet")
                     .where({date: day.toISOString().substring(0, 10)})
+                    .andWhere({status: Status.Pending})
                     .getMany();
 
-        if(!timesheet){
+        if(!timesheets){
             throw new NotFoundException('Timesheet Not Found')
         }
-        return timesheet
+        for (const timesheet of timesheets) {
+            timesheet.status = Status.Approved;
+        }
+        try {
+            const timesheetSaved = await this.timesheetRepository.save(timesheets)
+            return timesheetSaved    
+        } catch (error) {
+            throw new BadRequestException('Approving Failed')
+        } 
     }
 
     async getTimesheetByWeek(date){
@@ -136,13 +158,13 @@ export class TimesheetService {
         if(dateEnd<dateStart){
             throw new BadRequestException("date start is greater than date end")
         }
-        const timeseheet = await this.timesheetRepository.createQueryBuilder("timesheet")
+        const timesheet = await this.timesheetRepository.createQueryBuilder("timesheet")
                     .where({date: MoreThan( dateStart.toISOString().substring(0,10))})
                     .andWhere({date: LessThan(dateEnd.toISOString().substring(0,10))})
                     .getMany();
-        if(!timeseheet){
+        if(!timesheet){
             throw new NotFoundException('Timesheet Not Found')
         }
-        return timeseheet;
+        return timesheet;
     }
 }

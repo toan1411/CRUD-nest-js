@@ -54,11 +54,12 @@ export class TaskService {
             throw new NotFoundException("Project Not Found")
         }
         delete input.idOfProject;
-        const task = this.taskRepository.save({ ...input, project: project })
-        if (!task) {
+        try {
+            const task = this.taskRepository.save({ ...input, project: project })
+            return task
+        } catch (error) {
             throw new BadRequestException("Saving Failed")
         }
-        return task
     }
 
     async updateTask(input: UpdateTaskDto, id: number ){
@@ -66,11 +67,12 @@ export class TaskService {
         if(!task){
             throw new NotFoundException('Task Not Found')
         }
-        const taskSaved = this.taskRepository.save({...task,...input});
-        if(!taskSaved){
+        try {
+            const taskSaved = this.taskRepository.save({...task,...input});
+            return taskSaved
+        } catch (error) {
             throw new BadRequestException('Saving failed')
         }
-        return taskSaved;
     }
      
 
@@ -79,8 +81,9 @@ export class TaskService {
         if (!task) {
             throw new NotFoundException("Task Not Found");
         }
-        const taskRemoved = await this.taskRepository.remove(task);
-        if (!taskRemoved) {
+        try {
+            this.taskRepository.remove(task);
+        } catch (error) {
             throw new BadRequestException("Removing failed")
         }
     }

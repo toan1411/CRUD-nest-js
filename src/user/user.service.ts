@@ -61,13 +61,13 @@ export class UserService {
         user.isActive = createUserDTO.isActive;
         user.project = project;
         user.roles = createUserDTO.roles;
-        const savedUser = await this.userRepository.save(user);
-        if (savedUser) {
+        try {
+            const savedUser = await this.userRepository.save(user);
             return {
                 ...(savedUser),
                 token: this.authService.getTokenForUser(user)
             }
-        } else {
+        } catch (error) {
             throw new BadRequestException('Saving failed')
         }
     }
@@ -77,14 +77,15 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('User Not Found')
         }
-
-        const userUpdated = await this.userRepository.save({
-            ...user, ...input
-        })
-        if (!userUpdated) {
+        try {
+            const userUpdated = await this.userRepository.save({
+                ...user, ...input
+            })
+            return userUpdated
+        } catch (error) {
             throw new BadRequestException('Saving Failed')
+
         }
-        return userUpdated
     }
 
     async removeUser(id: number) {
@@ -92,8 +93,9 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('User Not Found')
         }
-        const userDelete = await this.userRepository.remove(user)
-        if (!userDelete) {
+        try {
+            this.userRepository.remove(user)
+        } catch (error) {
             throw new BadRequestException('Delete failed')
         }
     }
