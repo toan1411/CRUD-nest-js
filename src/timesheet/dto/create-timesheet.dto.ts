@@ -12,11 +12,7 @@ export class CreateTimesheetDto{
 
     @Length(3)
     @ApiProperty({example:"none"})
-    note: string;
-
-    @IsDateString()
-    @ApiProperty({example:"2020-12-3T00:00:00:000"})
-    date: Date;
+    note: string; 
 
     @IsNumber()
     @ApiProperty({example:1})
@@ -25,4 +21,8 @@ export class CreateTimesheetDto{
     @IsNumber()
     @ApiProperty({example:1})
     idOfUser:number;
+
+    @IsNumber()
+    @ApiProperty({example:2})
+    idOfPM: number
 }

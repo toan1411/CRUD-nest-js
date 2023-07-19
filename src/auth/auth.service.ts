@@ -8,7 +8,6 @@ import { Repository } from "typeorm";
 
 @Injectable()
 export class AuthService {
-    logger: any;
     constructor(
         @Inject(ConfigService)
         private readonly configService: ConfigService,
@@ -28,10 +27,8 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException("Username or password not correctly");
         }
-
         const isEqual = await bcrypt.compare(password, user.password)
         if (!isEqual) {
-            this.logger.debug(`Invalid credentials for user ${username}`);
             throw new UnauthorizedException("Password not correctly");
         }
         return user;

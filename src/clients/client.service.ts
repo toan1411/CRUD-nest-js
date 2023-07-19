@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Client } from './client.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { CreateClientDto } from './dto/create-client.dto';
 
 @Injectable()
 export class ClientService {
@@ -17,7 +18,7 @@ export class ClientService {
         let query = this.clientRepository.createQueryBuilder("client")
             .leftJoinAndSelect("client.projects", "project").take(take).skip(skip)
         if (options.locale) {
-            query = query.where("client.local =:local", { locale: options.locale })
+            query = query.where("client.locale =:locale", { locale: options.locale })
         }
         const client = await query.getMany()
         if (!client) {
@@ -26,7 +27,7 @@ export class ClientService {
         return client;
     }
 
-    async createClient(input) {
+    async createClient(input : CreateClientDto) {
         try {
             const created = await this.clientRepository.save({ ...input });
             return created;

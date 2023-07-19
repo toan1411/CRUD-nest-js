@@ -1,6 +1,6 @@
 import { Project } from "src/project/project.entity";
 import { Timesheet } from "src/timesheet/timesheet.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Role } from "./role.enum";
 
 
@@ -43,6 +43,7 @@ export class User {
     @ManyToOne(()=>Project, (project)=>project.users)
     project: Project;
 
-    @OneToMany(()=>Timesheet, (timesheet)=>timesheet.user)
+    @ManyToMany(()=>Timesheet, (timesheet)=>timesheet.users)
+    @JoinTable()
     timesheets: Timesheet[];
 }
