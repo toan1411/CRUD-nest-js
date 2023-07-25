@@ -8,11 +8,12 @@ import { ProjectModule } from './project/project.module';
 import { ConfigModule } from "@nestjs/config";
 import { dataSourceOptions } from "db/data-source";
 import { TimesheetModule } from './timesheet/timesheet.module';
+import { UserProjectModule } from './user-project/userProject.module';
 
 @Module({
-    imports: [ConfigModule.forRoot({isGlobal: true}),
-        TypeOrmModule.forRoot(dataSourceOptions),
-        AuthModule, UserModule, ClientModule, TaskModule, ProjectModule, TimesheetModule],
+    imports: [ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRoot(dataSourceOptions),
+        AuthModule, UserModule, ClientModule, TaskModule, ProjectModule, TimesheetModule, UserProjectModule],
     controllers: [],
     providers: [],
 })

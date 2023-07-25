@@ -1,7 +1,8 @@
+import { Transform, TransformFnParams } from "class-transformer";
+import moment from "moment";
 import { Client } from "src/clients/client.entity";
 import { Task } from "src/task/task.entity";
-import { Timesheet } from "src/timesheet/timesheet.entity";
-import { User } from "src/user/entities/user.entity";
+import { UserProject } from "src/user-project/userProject.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -9,14 +10,16 @@ export class Project {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column()
-    timeStart: Date;
+    @Transform(({ value }: TransformFnParams) => moment(value).format('YYYY-MM-DD'))
+    timeStart: string;
 
     @Column()
-    timeEnd: Date;
+    @Transform(({ value }: TransformFnParams) => moment(value).format('YYYY-MM-DD'))
+    timeEnd: string;
 
     @ManyToOne(() => Client, (client) => client.projects)
     client: Client;
@@ -24,9 +27,6 @@ export class Project {
     @OneToMany(() => Task, (task) => task.project)
     tasks: Task[];
 
-    @OneToMany(() => User, (user) => user.project)
-    users: User[];
-
-    @OneToMany(() => Timesheet, (timesheet) => timesheet.project)
-    timesheets: Timesheet[]
+    @OneToMany(() => UserProject, (userProject)=> userProject.project)
+    userProjects: UserProject[]
 }

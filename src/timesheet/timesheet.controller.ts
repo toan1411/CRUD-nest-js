@@ -8,17 +8,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { Day } from './dto/day.dto';
-
+import { SubmitDto } from './dto/submit.dto';
 
 @Controller('timesheet/')
 export class TimesheetController {
     constructor(private readonly timesheetService: TimesheetService) { }
 
     @Get()
-    @UseGuards(RoleGuard(Role.PM))
-    @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth() 
+    // @UseGuards(RoleGuard(Role.PM))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth() 
     async getAllTimesheet(@Query('page') page: number, @Query('limit') limit: number, @Query('status') status: string) {
         return await this.timesheetService.getAllTimesheet(page, limit, status);
     }
@@ -32,48 +31,49 @@ export class TimesheetController {
     }
 
     @Get('detail/myTimesheet/a')
-    @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth() 
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth() 
     async getTimesheet(@CurrentUser() user: User) {
         return await this.timesheetService.getTimesheet(user)
     }
 
     @Post()
+    //@UseGuards(RoleGuard(Role.USER))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async createTimesheet(@Body() input: CreateTimesheetDto) {
-        return await this.timesheetService.createTimesheet(input);
+    async createTimesheet(@Body() input: CreateTimesheetDto, @CurrentUser() user: User) {
+        return await this.timesheetService.createTimesheet(input, user);
     }
 
     @Patch('update/:id')
     @UseGuards(RoleGuard(Role.USER))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async updateTimesheet(@Body() input: UpdateTimesheetDto, @CurrentUser() user: User) {
-        return await this.timesheetService.updateTimesheet(input, user);
+    async updateTimesheet(@Body() input: UpdateTimesheetDto, @CurrentUser() pm: User) {
+        return await this.timesheetService.updateTimesheet(input, pm);
     }
 
     @Delete('delete/:id')
     @HttpCode(204)
-    @UseGuards(RoleGuard(Role.PM))
-    @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth()
-    async removeTimesheet(@Param('id') id: number) {
-        return await this.timesheetService.removeTimesheet(id);
+    // @UseGuards(RoleGuard(Role.PM))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth()
+    async removeTimesheet(@Param('id') id: number, @CurrentUser() pm: User) {
+        return await this.timesheetService.removeTimesheet(id, pm);
     }
 
     @Post('submit')
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async submitTimesheet(@CurrentUser() user: User){
-        return await this.timesheetService.submitTimesheet(user)
+    async submitTimesheet(@CurrentUser() user: User, @Body() day: SubmitDto) {
+        return await this.timesheetService.submitTimesheet(user, day)
     }
 
     @Get('approved')
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async approveTimesheet(@Body()date : Day, @CurrentUser()user :User) {
+    async approveTimesheet(@Body() date: SubmitDto, @CurrentUser() user: User) {
         return await this.timesheetService.approveTimesheetByWeek(date, user)
     }
 
@@ -81,15 +81,15 @@ export class TimesheetController {
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async getTimesheetByDay(@Body() date: Date) {
-        return await this.timesheetService.getTimesheetByWeek(date)
+    async approvedTimeSheetByDay(@Body() date: Date, @CurrentUser() user: User) {
+        return await this.timesheetService.approvedTimeSheetByDay(date, user)
     }
 
-    @Get('week')
-    @UseGuards(RoleGuard(Role.PM))
-    @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth()
-    async getTimesheetByWeek(@Body() date){
-        return await this.timesheetService.getTimesheetByWeek(date)
-    }
+    // @Get('week')
+    // @UseGuards(RoleGuard(Role.PM))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth()
+    // async getTimesheetByWeek(@Body() date : Day){
+    //     return await this.timesheetService.getTimesheetByWeek(date)
+    // }
 }

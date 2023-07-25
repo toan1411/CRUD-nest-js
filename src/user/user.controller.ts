@@ -16,8 +16,8 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Get()
-    @UseGuards(RoleGuard(Role.ADMIN))
-    @UseGuards(AuthGuard('jwt'))
+    // @UseGuards(RoleGuard(Role.ADMIN))
+    // @UseGuards(AuthGuard('jwt'))
     @ApiProperty({ required: false }) 
     @ApiQuery({name: 'page', required: false})
     @ApiQuery({name: 'limit', required: false})
@@ -39,10 +39,10 @@ export class UserController {
     }
 
     @Post()
-    @UseGuards(RoleGuard(Role.ADMIN))
-    @UseGuards(AuthGuard('jwt'))
-    @ApiCreatedResponse()
-    @ApiBearerAuth() 
+    // @UseGuards(RoleGuard(Role.ADMIN))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiCreatedResponse()
+    // @ApiBearerAuth() 
     async createUser(@Body() input: CreateUserDTO) {
         return await this.userService.createUser(input);
     }

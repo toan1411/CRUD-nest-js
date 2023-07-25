@@ -6,6 +6,8 @@ import RoleGuard from 'src/auth/guard/role.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { Role } from 'src/user/entities/role.enum';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { User } from 'src/user/entities/user.entity';
 
 @Controller('project')
 export class ProjectController {
@@ -15,12 +17,18 @@ export class ProjectController {
         return await this.projectService.getAllProject(page, limt)
     }
 
-    @Post()
-    @UseGuards(RoleGuard(Role.PM))
+    @Get('detail')
     @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth()
-    async createProject(@Body() input: CreateProjectDto) {
-        return await this.projectService.createProject(input)
+    async getProjectByUser(@CurrentUser() user : User){
+        return await this.projectService.getProjectByUser(user)
+    }
+
+    @Post()
+    // @UseGuards(RoleGuard(Role.PM))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth()
+    async createProject(@Body() input: CreateProjectDto, @CurrentUser() user : User) {
+        return await this.projectService.createProject(input, user)
     }
 
     @Patch(':id')
@@ -33,9 +41,9 @@ export class ProjectController {
 
     @Delete(':id')
     @HttpCode(204)
-    @UseGuards(RoleGuard(Role.PM))
-    @UseGuards(AuthGuard('jwt'))
-    @ApiBearerAuth()
+    // @UseGuards(RoleGuard(Role.PM))
+    // @UseGuards(AuthGuard('jwt'))
+    // @ApiBearerAuth()
     async removeProject(@Param() id: number){
         return await this.projectService.removeProject(id)
     }

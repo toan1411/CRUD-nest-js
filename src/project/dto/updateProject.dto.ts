@@ -10,12 +10,12 @@ export class UpdateProjectDto{
     @IsDateString()
     @IsOptional()
     @ApiProperty({example:"2022-2-12T00:00:00:000"})
-    timeStart: Date;
+    timeStart: string;
 
     @IsDateString()
     @IsOptional()
     @ApiProperty({example:"2022-2-12T00:00:00:000"})
-    timeEnd: Date;
+    timeEnd: string;
 
     @IsNumber()
     @IsOptional()

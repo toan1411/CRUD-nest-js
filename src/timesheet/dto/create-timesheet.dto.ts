@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsNumber, Length } from "class-validator";
+import { IsNumber, Length } from "class-validator";
 import { Status } from "./status.enum";
 
 export class CreateTimesheetDto{
@@ -15,14 +15,10 @@ export class CreateTimesheetDto{
     note: string; 
 
     @IsNumber()
-    @ApiProperty({example:1})
-    idOfProject: number;
+    @ApiProperty({example: 8})
+    workingTime: number
 
     @IsNumber()
-    @ApiProperty({example:1})
-    idOfUser:number;
-
-    @IsNumber()
-    @ApiProperty({example:2})
-    idOfPM: number
+    @ApiProperty({example: 1})
+    idOfProject:number
 }
