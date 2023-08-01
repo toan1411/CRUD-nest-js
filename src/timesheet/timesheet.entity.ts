@@ -1,5 +1,5 @@
 
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Status } from "./dto/status.enum";
 import { Transform, TransformFnParams } from "class-transformer";
 import moment from 'moment';
@@ -26,7 +26,7 @@ export class Timesheet {
   @Transform(({ value }: TransformFnParams) => moment(value).format('YYYY-MM-DD'))
   date: string;
 
-  @OneToOne(()=> UserProject )
+  @ManyToOne(()=> UserProject, userProject => userProject.timesheets )
   @JoinColumn()
   userProject: UserProject
 

@@ -24,9 +24,9 @@ export class ProjectController {
     }
 
     @Post()
-    // @UseGuards(RoleGuard(Role.PM))
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth()
+    @UseGuards(RoleGuard(Role.PM))
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
     async createProject(@Body() input: CreateProjectDto, @CurrentUser() user : User) {
         return await this.projectService.createProject(input, user)
     }
@@ -41,9 +41,9 @@ export class ProjectController {
 
     @Delete(':id')
     @HttpCode(204)
-    // @UseGuards(RoleGuard(Role.PM))
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth()
+    @UseGuards(RoleGuard(Role.PM))
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
     async removeProject(@Param() id: number){
         return await this.projectService.removeProject(id)
     }

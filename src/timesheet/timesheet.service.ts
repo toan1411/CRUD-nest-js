@@ -1,16 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Timesheet } from './timesheet.entity';
-import { LessThan, MoreThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Project } from 'src/project/project.entity';
 import { Status } from './dto/status.enum';
 import { SubmitDto } from './dto/submit.dto';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
-import { Role } from 'src/user/entities/role.enum';
 import { UserProject } from 'src/user-project/userProject.entity';
-import { IsDate } from 'class-validator';
-import { now } from 'moment';
+import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
 
 
 @Injectable()
@@ -49,21 +47,17 @@ export class TimesheetService {
         return timesheet;
     }
 
-    async getTimesheet(user: User) {
-        // const timeseheet = await this.timesheetRepository.createQueryBuilder('timesheet')
-        //     .leftJoinAndSelect("timesheet.users", "user")
-        //     .select(['timesheet.name', 'timesheet.status', 'timesheet.note', 'timesheet.date'])
-        //     .where({ users: [user] })
-        //     .getMany()
-        const timeseheet = await this.timesheetRepository.createQueryBuilder('timesheet')
-            .leftJoinAndSelect("timesheet.userProject", "userProject")
-            .leftJoinAndSelect("userProject.project", "project")
-            .leftJoinAndSelect("userProject.user", "user")
+    async getMyTimesheet(user : User) {
+        const timeseheets = await this.timesheetRepository.createQueryBuilder('timesheet')
+            .leftJoinAndSelect('timesheet.userProject', 'userProject')
+            .leftJoinAndSelect('userProject.user', 'user')
+            .leftJoinAndSelect('userProject.project', 'project')
+            .where('user.username = :username',{username: user.username})
             .getMany()
-        if (!timeseheet) {
+        if (timeseheets.length === 0) {
             throw new NotFoundException('Timesheet Not Found')
         }
-        return timeseheet;
+        return timeseheets;
     }
 
     async createTimesheet(input: CreateTimesheetDto, user: User) {
@@ -78,8 +72,6 @@ export class TimesheetService {
             .where('user.username = :username', { username: user.username })
             .andWhere('project.name = :name', { name: project.name })
             .getOne()
-
-        console.log(userProject)
         if (!userProject) {
             throw new BadRequestException('The user did not make this project')
         }
@@ -105,16 +97,21 @@ export class TimesheetService {
         }
     }
 
-    async updateTimesheet(input, user: User) {
-        const timesheet = await this.timesheetRepository.createQueryBuilder("timesheet")
-            .leftJoinAndSelect("timesheet.users", "user")
-            .where('user.username =:username', { username: user.username })
+    async updateTimesheet(input: UpdateTimesheetDto, user: User, day: string) {
+        const timesheet = await this.timesheetRepository.createQueryBuilder('timesheet')
+            .leftJoinAndSelect('timesheet.userProject', 'userProject')
+            .leftJoinAndSelect('userProject.user', 'user')
+            .select(['timesheet.id', 'timesheet.note', 'timesheet.status', 'timesheet.workingTime'])
+            .where('user.username = :username', { username: user.username })
+            .where('timesheet.status != :status', { status: Status.Approved })
+            .andWhere('timesheet.date = :date', { date: new Date(day).toISOString().slice(0, 10) })
             .getOne()
+
         if (!timesheet) {
             throw new NotFoundException('Timesheet Not Found')
         }
         try {
-            const saved = await this.timesheetRepository.save({ ...timesheet, ...input })
+            const saved = await this.timesheetRepository.save({ ...timesheet, input })
             return saved
         } catch (error) {
             throw new BadRequestException('Saving failed')
@@ -122,7 +119,14 @@ export class TimesheetService {
     }
 
     async removeTimesheet(id: number, user: User) {
-        const timesheet = await this.timesheetRepository.findOne({ where: { id: id } })
+        console.log(user)
+        const timesheet = await this.timesheetRepository.createQueryBuilder('timesheet')
+            .leftJoinAndSelect('timesheet.userProject', 'userProject')
+            .leftJoinAndSelect('userProject.project', 'project')
+            .leftJoinAndSelect('userProject.user', 'user')
+            .where('user.username = :username', { username: user.username })
+            .andWhere('timesheet.id = :id', { id: id })
+            .getMany()
         console.log(timesheet)
         if (!timesheet) {
             throw new NotFoundException("Timesheet Not Found")
@@ -140,10 +144,10 @@ export class TimesheetService {
         endDay.setDate(startDay.getDate() + 6)
         const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.userProject', 'userProject')
-            .leftJoinAndSelect('userProject.project','project')
+            .leftJoinAndSelect('userProject.project', 'project')
             .leftJoinAndSelect('userProject.user', 'user')
             .where('user.username = :username', { username: user.username })
-            .andWhere('project.id = :id',{id:inputSubmit.idOfProject})
+            .andWhere('project.id = :id', { id: inputSubmit.idOfProject })
             .andWhere('timesheet.status = :status', { status: Status.New })
             .andWhere('timesheet.date > :startDay', { startDay: startDay.toISOString().slice(0, 10) })
             .andWhere('timesheet.date < :endDay', { endDay: endDay.toISOString().slice(0, 10) })
@@ -166,12 +170,18 @@ export class TimesheetService {
         const startDay = new Date(inputSubmit.day)
         const endDay = new Date(startDay)
         endDay.setDate(endDay.getDate() + 6)
+        console.log('id',user.id)
+        const checkPm = await this.userProjectRespository.createQueryBuilder('userProject')
+            .where('userProject.userId = :userID',{userID:3})
+            .andWhere('userProject.projectId = :projectId',{projectId: inputSubmit.idOfProject})
+            .getOne()
+        if(!checkPm){
+            throw new BadRequestException('PM does not undertake the project')
+        }
         const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.userProject', 'userProject')
             .leftJoinAndSelect('userProject.project', 'project')
-            .leftJoinAndSelect('userProject.user', 'user')
-            .where('user.username = :username', { username: user.username })
-            .andWhere('project.id = :id',{id : inputSubmit.idOfProject})
+            .andWhere('project.id = :id', { id: inputSubmit.idOfProject })
             .andWhere('timesheet.status = :status', { status: Status.Pending })
             .andWhere('timesheet.date > :startDay', { startDay: startDay.toISOString().slice(0, 10) })
             .andWhere('timesheet.date < :endDay', { endDay: endDay.toISOString().slice(0, 10) })
@@ -190,15 +200,16 @@ export class TimesheetService {
         }
     }
 
-    async approvedTimeSheetByDay(date, user: User) {
-        const day = new Date(`${date.year}-${date.month}-${date.day}`).toISOString().slice(0, 10);
-        const timesheets = await this.timesheetRepository
-            .createQueryBuilder("timesheet")
-            .leftJoinAndSelect('timesheet.users', 'user')
-            .where('user.username =:username', { username: user.username })
-            .andWhere('timesheet.date =:date', { date: day })
-            .andWhere({ status: Status.Pending })
-            .getMany();
+    async approvedTimeSheetByDay(date: SubmitDto, user: User) {
+        const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
+            .leftJoinAndSelect('timesheet.userProject', 'userProject')
+            .leftJoinAndSelect('userProject.user', 'user')
+            .leftJoinAndSelect('userProject.project', 'project')
+            .where('project.id = :id', { id: date.idOfProject })
+            .andWhere('user.username = :username', { username: user.username })
+            .andWhere('timesheet.date = :date', { date: new Date(date.day).toISOString().slice(0, 10) })
+            .andWhere('timesheet.status = :status', { status: Status.Pending })
+            .getMany()
 
         if (!timesheets) {
             throw new NotFoundException('Timesheet Not Found')
@@ -214,19 +225,5 @@ export class TimesheetService {
         }
     }
 
-    // async getTimesheetByWeek(date: Day) {
-    //     const dateStart = new Date(`${date.yearStart}-${date.monthStart}-${date.dayStart}`);
-    //     const dateEnd = new Date(`${date.yearEnd}-${date.monthEnd}-${date.dayEnd}`)
-    //     if (dateEnd < dateStart) {
-    //         throw new BadRequestException("date start is greater than date end")
-    //     }
-    //     const timesheet = await this.timesheetRepository.createQueryBuilder("timesheet")
-    //         .where({ date: MoreThan(dateStart.toISOString().substring(0, 10)) })
-    //         .andWhere({ date: LessThan(dateEnd.toISOString().substring(0, 10)) })
-    //         .getMany();
-    //     if (!timesheet) {
-    //         throw new NotFoundException('Timesheet Not Found')
-    //     }
-    //     return timesheet;
-    // }
+
 }

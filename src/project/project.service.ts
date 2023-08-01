@@ -47,22 +47,22 @@ export class ProjectService {
     }
 
     async createProject(input: CreateProjectDto, user : User) {
-        // const client = await this.clientRepository.findOne({ where: { id: input.idOfClient } })
-        // if (!client) {
-        //     throw new NotFoundException("Client Not Found")
-        // }
-        // delete input.idOfClient;
-        // try {
-        //     const createdProject = await this.projectRepository.save({
-        //         ...input, client: client,
-        //         timeStart: new Date(input.timeStart).toISOString().slice(0, 10),
-        //         timeEnd: new Date(input.timeEnd).toISOString().slice(0, 10)
-        //     })
-        //     const savedUserProject  = await this.userProjectRepository.save({user: user, project: createdProject})
-        //     return {createdProject,savedUserProject}
-        // } catch (error) {
-        //     throw new BadRequestException("saving failed")
-        // }
+        const client = await this.clientRepository.findOne({ where: { id: input.idOfClient } })
+        if (!client) {
+            throw new NotFoundException("Client Not Found")
+        }
+        delete input.idOfClient;
+        try {
+            const createdProject = await this.projectRepository.save({
+                ...input, client: client,
+                timeStart: new Date(input.timeStart).toISOString().slice(0, 10),
+                timeEnd: new Date(input.timeEnd).toISOString().slice(0, 10)
+            })
+            const savedUserProject  = await this.userProjectRepository.save({user: user, project: createdProject})
+            return {createdProject,savedUserProject}
+        } catch (error) {
+            throw new BadRequestException("saving failed")
+        }
     }
 
     async updateProject(input: UpdateProjectDto, id: number) {

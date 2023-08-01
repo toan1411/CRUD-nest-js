@@ -1,27 +1,23 @@
 import { IsDateString, IsNumber, IsOptional, Length } from "class-validator";
+import { Status } from "./status.enum";
 
-export class UpdateTimesheetDto{
+export class UpdateTimesheetDto {
     @IsOptional()
     @Length(3)
-    name:string;
+    name: string;
 
     @IsOptional()
-    @Length(5)
-    status:string;
+    status: Status;
 
     @IsOptional()
     @Length(5)
     note: string;
 
-    @IsOptional()
     @IsDateString()
     date: Date;
 
     @IsOptional()
     @IsNumber()
-    idOfProject: number;
+    workingTime: number
 
-    @IsOptional()
-    @IsNumber()
-    idOfUser:number;
 }

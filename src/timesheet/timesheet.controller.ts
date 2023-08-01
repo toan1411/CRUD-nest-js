@@ -15,9 +15,9 @@ export class TimesheetController {
     constructor(private readonly timesheetService: TimesheetService) { }
 
     @Get()
-    // @UseGuards(RoleGuard(Role.PM))
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth() 
+    @UseGuards(RoleGuard(Role.PM))
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth() 
     async getAllTimesheet(@Query('page') page: number, @Query('limit') limit: number, @Query('status') status: string) {
         return await this.timesheetService.getAllTimesheet(page, limit, status);
     }
@@ -31,34 +31,35 @@ export class TimesheetController {
     }
 
     @Get('detail/myTimesheet/a')
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth() 
-    async getTimesheet(@CurrentUser() user: User) {
-        return await this.timesheetService.getTimesheet(user)
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth() 
+    async getTimesheet(@CurrentUser() user : User) {
+        return await this.timesheetService.getMyTimesheet(user)
     }
 
     @Post()
-    //@UseGuards(RoleGuard(Role.USER))
+    @UseGuards(RoleGuard(Role.USER))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
     async createTimesheet(@Body() input: CreateTimesheetDto, @CurrentUser() user: User) {
         return await this.timesheetService.createTimesheet(input, user);
     }
 
-    @Patch('update/:id')
+    @Patch('update/:day')
     @UseGuards(RoleGuard(Role.USER))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async updateTimesheet(@Body() input: UpdateTimesheetDto, @CurrentUser() pm: User) {
-        return await this.timesheetService.updateTimesheet(input, pm);
+    async updateTimesheet(@Body() input: UpdateTimesheetDto, @CurrentUser() pm: User, @Param('day') day : string ) {
+        return await this.timesheetService.updateTimesheet(input, pm, day);
     }
 
     @Delete('delete/:id')
     @HttpCode(204)
-    // @UseGuards(RoleGuard(Role.PM))
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth()
+     @UseGuards(RoleGuard(Role.PM))
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
     async removeTimesheet(@Param('id') id: number, @CurrentUser() pm: User) {
+        console.log(pm)
         return await this.timesheetService.removeTimesheet(id, pm);
     }
 
@@ -81,15 +82,8 @@ export class TimesheetController {
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async approvedTimeSheetByDay(@Body() date: Date, @CurrentUser() user: User) {
+    async approvedTimeSheetByDay(@Body() date: SubmitDto, @CurrentUser() user: User) {
         return await this.timesheetService.approvedTimeSheetByDay(date, user)
     }
 
-    // @Get('week')
-    // @UseGuards(RoleGuard(Role.PM))
-    // @UseGuards(AuthGuard('jwt'))
-    // @ApiBearerAuth()
-    // async getTimesheetByWeek(@Body() date : Day){
-    //     return await this.timesheetService.getTimesheetByWeek(date)
-    // }
 }
