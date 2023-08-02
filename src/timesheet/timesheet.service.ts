@@ -9,6 +9,7 @@ import { SubmitDto } from './dto/submit.dto';
 import { CreateTimesheetDto } from './dto/create-timesheet.dto';
 import { UserProject } from 'src/user-project/userProject.entity';
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto';
+import { EvaluateDto } from './dto/evaluate.dtp';
 
 
 @Injectable()
@@ -166,14 +167,14 @@ export class TimesheetService {
         }
     }
 
-    async approveTimesheetByWeek(inputSubmit: SubmitDto, user: User) {
-        const startDay = new Date(inputSubmit.day)
+    async evaluateTimesheet(inputEvaluate: EvaluateDto, user: User) {
+        const startDay = new Date(inputEvaluate.day)
         const endDay = new Date(startDay)
         endDay.setDate(endDay.getDate() + 6)
         console.log('id',user.id)
         const checkPm = await this.userProjectRespository.createQueryBuilder('userProject')
             .where('userProject.userId = :userID',{userID:3})
-            .andWhere('userProject.projectId = :projectId',{projectId: inputSubmit.idOfProject})
+            .andWhere('userProject.projectId = :projectId',{projectId: inputEvaluate.idOfProject})
             .getOne()
         if(!checkPm){
             throw new BadRequestException('PM does not undertake the project')
@@ -181,7 +182,7 @@ export class TimesheetService {
         const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.userProject', 'userProject')
             .leftJoinAndSelect('userProject.project', 'project')
-            .andWhere('project.id = :id', { id: inputSubmit.idOfProject })
+            .andWhere('project.id = :id', { id: inputEvaluate.idOfProject })
             .andWhere('timesheet.status = :status', { status: Status.Pending })
             .andWhere('timesheet.date > :startDay', { startDay: startDay.toISOString().slice(0, 10) })
             .andWhere('timesheet.date < :endDay', { endDay: endDay.toISOString().slice(0, 10) })
@@ -189,12 +190,26 @@ export class TimesheetService {
         if (timesheets.length === 0) {
             throw new NotFoundException('Timesheet Not Found')
         }
-        for (const timesheet of timesheets) {
-            timesheet.status = Status.Approved;
+        if(inputEvaluate.status === Status.Approved){
+            for (const timesheet of timesheets) {
+                timesheet.status = Status.Approved;
+            }
+        }else{
+            for (const timesheet of timesheets) {
+                timesheet.status = Status.REJECTED;
+                timesheet.workingTime = 0;
+            }
         }
+        const totalWorkingTime = timesheets.reduce((acc,timesheet)=>{
+            return acc + timesheet.workingTime;
+        },0)
+        
         try {
             const timesheetSaved = await this.timesheetRepository.save(timesheets)
-            return timesheetSaved
+            return {
+                timesheetSaved: timesheetSaved,
+                totalWorkingTime: totalWorkingTime
+            }
         } catch (error) {
             throw new BadRequestException('Approving Failed')
         }

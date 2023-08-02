@@ -9,6 +9,7 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SubmitDto } from './dto/submit.dto';
+import { EvaluateDto } from './dto/evaluate.dtp';
 
 @Controller('timesheet/')
 export class TimesheetController {
@@ -74,8 +75,8 @@ export class TimesheetController {
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async approveTimesheet(@Body() date: SubmitDto, @CurrentUser() user: User) {
-        return await this.timesheetService.approveTimesheetByWeek(date, user)
+    async evaluateTimesheet(@Body() date: EvaluateDto, @CurrentUser() user: User) {
+        return await this.timesheetService.evaluateTimesheet(date, user)
     }
 
     @Get('day')
