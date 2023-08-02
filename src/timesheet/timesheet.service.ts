@@ -167,13 +167,12 @@ export class TimesheetService {
         }
     }
 
-    async evaluateTimesheet(inputEvaluate: EvaluateDto, user: User) {
+    async evaluateTimesheet(inputEvaluate: EvaluateDto, user: User, id : number) {
         const startDay = new Date(inputEvaluate.day)
         const endDay = new Date(startDay)
         endDay.setDate(endDay.getDate() + 6)
-        console.log('id',user.id)
         const checkPm = await this.userProjectRespository.createQueryBuilder('userProject')
-            .where('userProject.userId = :userID',{userID:3})
+            .where('userProject.userId = :userID',{userID:user.id})
             .andWhere('userProject.projectId = :projectId',{projectId: inputEvaluate.idOfProject})
             .getOne()
         if(!checkPm){
@@ -181,8 +180,10 @@ export class TimesheetService {
         }
         const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.userProject', 'userProject')
+            .leftJoinAndSelect('userProject.user','user')
             .leftJoinAndSelect('userProject.project', 'project')
-            .andWhere('project.id = :id', { id: inputEvaluate.idOfProject })
+            .where('user.id = :idUser',{idUser: id})
+            .andWhere('project.id = :idProject', { idProject: inputEvaluate.idOfProject })
             .andWhere('timesheet.status = :status', { status: Status.Pending })
             .andWhere('timesheet.date > :startDay', { startDay: startDay.toISOString().slice(0, 10) })
             .andWhere('timesheet.date < :endDay', { endDay: endDay.toISOString().slice(0, 10) })
@@ -215,17 +216,16 @@ export class TimesheetService {
         }
     }
 
-    async approvedTimeSheetByDay(date: SubmitDto, user: User) {
+    async evaluateTimeSheetByDay(inputEvaluate: EvaluateDto, user: User) {
         const timesheets = await this.timesheetRepository.createQueryBuilder('timesheet')
             .leftJoinAndSelect('timesheet.userProject', 'userProject')
             .leftJoinAndSelect('userProject.user', 'user')
             .leftJoinAndSelect('userProject.project', 'project')
-            .where('project.id = :id', { id: date.idOfProject })
+            .where('project.id = :id', { id: inputEvaluate.idOfProject })
             .andWhere('user.username = :username', { username: user.username })
-            .andWhere('timesheet.date = :date', { date: new Date(date.day).toISOString().slice(0, 10) })
+            .andWhere('timesheet.date = :date', { date: new Date(inputEvaluate.day).toISOString().slice(0, 10) })
             .andWhere('timesheet.status = :status', { status: Status.Pending })
             .getMany()
-
         if (!timesheets) {
             throw new NotFoundException('Timesheet Not Found')
         }

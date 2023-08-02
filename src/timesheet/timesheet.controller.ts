@@ -71,20 +71,20 @@ export class TimesheetController {
         return await this.timesheetService.submitTimesheet(user, day)
     }
 
-    @Get('approved')
+    @Get('evaluation/:id')
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async evaluateTimesheet(@Body() date: EvaluateDto, @CurrentUser() user: User) {
-        return await this.timesheetService.evaluateTimesheet(date, user)
+    async evaluateTimesheet(@Body() date: EvaluateDto, @CurrentUser() user: User, @Param('id') id : number) {
+        return await this.timesheetService.evaluateTimesheet(date, user, id)
     }
 
     @Get('day')
     @UseGuards(RoleGuard(Role.PM))
     @UseGuards(AuthGuard('jwt'))
     @ApiBearerAuth()
-    async approvedTimeSheetByDay(@Body() date: SubmitDto, @CurrentUser() user: User) {
-        return await this.timesheetService.approvedTimeSheetByDay(date, user)
+    async approvedTimeSheetByDay(@Body() date: EvaluateDto, @CurrentUser() user: User) {
+        return await this.timesheetService.evaluateTimeSheetByDay(date, user)
     }
 
 }

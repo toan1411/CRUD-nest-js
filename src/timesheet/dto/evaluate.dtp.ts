@@ -8,6 +8,6 @@ export class EvaluateDto {
     @IsNumber()
     idOfProject: number;
 
-    @IsEnum(Status,{ message: 'Status must be either "approved" or "rejected"' })
+    @IsEnum(Status)
     status: Status
 }
